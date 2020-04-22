@@ -1,0 +1,56 @@
+Create an Apex class that implements the Database.Batchable interface to do the following in the org :
+- query all Lead records with Country = 'US' 
+- for queried records, update LeadSource = 'Web' and Rating = 'Hot'. 
+Write unit tests that achieve 100% code coverage for the class.
+
+
+global class LeadUpdate implements Database.Batchable <SObject> {
+//START METHOD
+    global Database.QueryLocator start(Database.BatchableContext bc){
+        //Lead[] Query=[Select LeadSource,Rating from Lead where Country='US'];
+        return Database.getQueryLocator([Select LeadSource,Rating from Lead where Country='US']);
+            }
+//EXECUTE METHOD
+    global void execute(Database.BatchableContext bc, List<Lead> scope){
+        for(Lead l: scope){
+            l.LeadSource='Web';
+            l.Rating = 'Hot';
+        }
+        update scope;
+    }
+//FINISH METHOD
+    global void finish(Database.BatchableContext bc){
+        Id job= bc.getJobId();
+        System.debug(job);
+    }
+}
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+@istest
+private class LeadUpdateTest {
+    @istest
+    static void testlead(){
+        List<Lead> l= new List<Lead>();
+        lead l1= new lead();
+        l1.LastName='surya';
+        l1.Company='Company';
+        l1.Status='Closed-Converted';
+        l1.LeadSource='Web';
+        l1.Rating = 'Hot';
+        l.add(l1);
+        insert l;
+   
+    Test.startTest();
+    LeadUpdate lp= new LeadUpdate();
+    Id jobid= Database.executeBatch(lp);
+    Test.stopTest();
+    }
+}
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Lead[] le=[Select LeadSource,Rating from Lead where Country ='US'];
+system.debug(le);
